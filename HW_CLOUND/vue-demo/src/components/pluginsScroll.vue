@@ -3,7 +3,7 @@
     <ul>
       <li v-for="item in list" :key="item">{{ item }}</li>
     </ul>
-    <div v-if="loading">正在加载中...</div>
+    <div id="loading">正在加载中...</div>
   </div>
 </template>
 
@@ -17,7 +17,6 @@ const loading = ref(false)
 
 
 const loadData = async () => {
-  console.log(12);
   loading.value = true // 开始加载数据
   const response = getList()
   list.value = [...list.value, ...response] // 将数据添加到列表中
@@ -34,7 +33,7 @@ const getList = ()=>{
 const handleScroll = () => {
   // 监听滚动事件
   const container = document.querySelector('.infinite-scroll') // 获取滚动容器
-  const { scrollTop,  , clientHeight } = container // 获取滚动高度和内容高度
+  const { scrollTop, scrollHeight, clientHeight } = container // 获取滚动高度和内容高度
   if (scrollTop + clientHeight >= scrollHeight && !loading.value) {
     loadData() // 滚动到底部，加载更多数据
   }
@@ -42,7 +41,22 @@ const handleScroll = () => {
 onMounted(() => {
   loadData();
   const container = document.querySelector('.infinite-scroll')
-  container.addEventListener('scroll', handleScroll)
+  const ob = new IntersectionObserver(async (entries)=>{
+    const entry = entries[0];
+    console.log(entry);
+    if (!entry.isIntersecting) {
+      return;
+    } 
+    await loadData();
+    // console.log('12313');
+  }, {
+    root: container,
+    threshold: 0,
+  });
+  const loadMode = document.getElementById('loading');
+  ob.observe(loadMode);
+  // 
+  // container.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
