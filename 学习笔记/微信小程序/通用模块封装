@@ -1,0 +1,148 @@
+## 1.消息组件封装
+
+### 封装思路
+
+1. 创建一个**toast**方法对**wx.showToast()**进行封装
+2. 调用时，传递对象作为参数
+
+
+
+### 调用方式
+
+1. 模块化方式导入
+
+```js
+import {toast} from './extendApi';
+toast()
+toast({title: '加载'，mask: true})
+```
+
+2. 挂载到**wx**全局对象上
+
+```javascript
+wx.toast()
+```
+
+
+
+### 封装代码
+
+```javascript
+const toast = ({
+  title = "数据加载zhong",
+  icon = 'none',
+  duration = 2000,
+  mask = true
+} = {}) => {
+  wx.showToast({
+    title,
+    icon,
+    duration, 
+    mask
+  })
+}
+
+wx.toast = toast
+
+export {
+  toast
+}
+```
+
+## 2.modal组件封装（wx.showModal()）
+
+### 封装思路
+
+1. 创建一个**modal**方法对**wx.showModal()**进行封装
+2. 调用时，传递对象作为参数
+
+### 封装代码
+
+```javascript
+const modal = (options={})=>{
+  return new Promise((resolve)=>{
+    const defaultOpt = {
+      title: '提示',
+      content: "确定",
+      confirmColor:'#f3514f'
+    }
+    const normalOpts = Object.assign({}, defaultOpt, options)
+    wx.showModal({
+      ...normalOpts,
+      complete({confirm, cancel}){
+        confirm && resolve(true)
+        cancel && resolve(false)
+      }
+    })
+  })
+}
+```
+
+
+
+## 3.封装本地存储API
+
+本地存储API
+
+同步：wx.setStorageSync 
+
+异步：wx.setStorage
+
+
+
+### 封装代码
+
+```javascript
+/**
+ * @description 存储数据
+ * @param {*} key 本地存储中指定的key
+ * @param {*} value 需要缓存的数据
+ */
+const setStorage = (key, value)=>{
+  try {
+    wx.setStorageSync(key, value)
+  } catch (error) {
+    console.error(`存储指定${key}发生异常`)
+  }
+}
+
+/**
+ * @description 从本地环境中获取指定key的值
+ * @param {*} key 
+ */
+const getStorage = (key)=>{
+  try {
+    return wx.getStorageSync(key);
+  } catch (error) {
+    console.error(`获取${key}失败`)
+  }
+}
+
+/**
+ * @description 移除本地缓存中指定key
+ * @param {*} key 
+ */
+const removeStorage = (key)=>{
+  try {
+    wx.removeStorageSync(key);
+  } catch (error) {
+    console.error(`移除${key}失败`)
+  }
+}
+
+/**
+ * @description 从本地清除缓存数据
+ */
+const clearStorage = ()=> {
+  try {
+    wx.removeStorageSync();
+  } catch (error) {
+    console.error(`从本地清空数据失败`);
+  }
+}
+```
+
+
+
+
+
